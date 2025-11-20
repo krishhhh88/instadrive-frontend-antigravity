@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
 import {
     LayoutDashboard,
     HardDrive,
@@ -82,7 +82,7 @@ export default function DashboardLayout() {
 
                     {/* User Profile */}
                     <div className="p-4 border-t border-[var(--border-color)]">
-                        <button className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-[var(--bg-primary)] transition-colors text-left">
+                        <Link to="/login" className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-[var(--bg-primary)] transition-colors text-left">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                                 JD
                             </div>
@@ -91,7 +91,7 @@ export default function DashboardLayout() {
                                 <p className="text-xs text-[var(--text-secondary)] truncate">Pro Plan</p>
                             </div>
                             <LogOut size={18} className="text-[var(--text-secondary)]" />
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </aside>
