@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { Clock, Calendar as CalendarIcon, ChevronDown, Plus, Trash2, Play } from 'lucide-react';
+import { Clock, ChevronDown, Plus, Trash2, Play } from 'lucide-react';
 
 export default function Scheduler() {
-    const [selectedDay, setSelectedDay] = useState('Monday');
+    const selectedDay = 'Monday';
 
     const mockVideos = [
         { id: 1, title: 'Summer Vacation Highlights', duration: '0m 58s', thumb: 'bg-gradient-to-br from-orange-400 to-pink-500' },

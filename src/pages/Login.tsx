@@ -1,17 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { login } from '../lib/api';
 
 export default function Login() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLogin = (e: React.FormEvent) => {
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Mock login - in a real app this would hit the backend
-        if (email && password) {
+        setError('');
+        setLoading(true);
+        try {
+            await login(email);
             navigate('/dashboard');
+        } catch (err) {
+            setError('Login failed. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -75,9 +85,15 @@ export default function Login() {
                             <a href="#" className="text-indigo-400 hover:text-indigo-300">Forgot password?</a>
                         </div>
 
-                        <button type="submit" className="w-full btn-primary py-2.5 flex items-center justify-center gap-2 group">
-                            <span>Sign In</span>
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+
+                        <button type="submit" disabled={loading} className="w-full btn-primary py-2.5 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed">
+                            {loading ? <Loader2 className="animate-spin" size={18} /> : (
+                                <>
+                                    <span>Sign In</span>
+                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
                         </button>
                     </form>
 
