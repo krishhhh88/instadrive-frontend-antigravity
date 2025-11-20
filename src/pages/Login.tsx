@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { login } from '../lib/api';
 
 export default function Login() {
@@ -88,12 +88,8 @@ export default function Login() {
                         {error && <div className="text-red-500 text-sm text-center">{error}</div>}
 
                         <button type="submit" disabled={loading} className="w-full btn-primary py-2.5 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed">
-                            {loading ? <Loader2 className="animate-spin" size={18} /> : (
-                                <>
-                                    <span>Sign In</span>
-                                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                                </>
-                            )}
+                            <span>{loading ? 'Signing in...' : 'Sign In'}</span>
+                            {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
                         </button>
                     </form>
 
