@@ -6,6 +6,7 @@ import Scheduler from './pages/Scheduler';
 import Settings from './pages/Settings';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
     return (
@@ -14,6 +15,7 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
                 {/* Protected Dashboard Routes */}
                 <Route path="/dashboard" element={<DashboardLayout />}>
