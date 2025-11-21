@@ -102,7 +102,7 @@ export default function Login() {
                         </div>
 
                         <a
-                            href={`${import.meta.env.VITE_API_URL || 'https://instadrive-backend-antigravity.vercel.app/api'}/auth/google`}
+                            href={`${import.meta.env.VITE_API_URL || 'https://instadrive-backend-antigravity.vercel.app'}/api/auth/google`}
                             className="w-full flex items-center justify-center gap-2 bg-white text-black py-2.5 rounded-lg font-medium hover:bg-neutral-200 transition-colors"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
