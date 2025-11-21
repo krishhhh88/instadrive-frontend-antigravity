@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { login } from '../lib/api';
 
@@ -94,7 +94,7 @@ export default function Login() {
                     </form>
 
                     <div className="mt-6 text-center text-sm text-neutral-500">
-                        Don't have an account? <a href="#" className="text-white hover:underline">Create one</a>
+                        Don't have an account? <Link to="/register" className="text-white hover:underline">Create one</Link>
                     </div>
                 </div>
             </div>
