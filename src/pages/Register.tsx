@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, User } from 'lucide-react';
-import { login } from '../lib/api'; // We'll assume login works for now, or we'd need a register API
+import { register } from '../lib/api';
 
 export default function Register() {
     const navigate = useNavigate();
@@ -17,12 +17,10 @@ export default function Register() {
         setError('');
         setLoading(true);
         try {
-            // For now, we'll just simulate registration or use login
-            // In a real app, you'd have a register endpoint
-            await login(email);
+            await register(name, email, password);
             navigate('/dashboard');
-        } catch (err) {
-            setError('Registration failed. Please try again.');
+        } catch (err: any) {
+            setError(err.response?.data?.error || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }

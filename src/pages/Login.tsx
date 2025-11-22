@@ -16,7 +16,7 @@ export default function Login() {
         setError('');
         setLoading(true);
         try {
-            await login(email);
+            await login(email, password);
             navigate('/dashboard');
         } catch (err) {
             setError('Login failed. Please try again.');
