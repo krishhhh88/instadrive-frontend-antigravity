@@ -1,6 +1,64 @@
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function Settings() {
+    const [connections, setConnections] = useState({
+        googleConnected: false,
+        instagramConnected: false,
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchSettings();
+    }, []);
+
+    const fetchSettings = async () => {
+        try {
+            const response = await fetch('/api/settings');
+            if (response.ok) {
+                const data = await response.json();
+                setConnections(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch settings:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleConnect = (provider: 'google' | 'instagram') => {
+        window.location.href = `/api/auth/${provider}`;
+    };
+
+    const handleDisconnect = async (provider: 'google' | 'instagram') => {
+        if (!confirm(`Are you sure you want to disconnect ${provider}?`)) return;
+
+        try {
+            const response = await fetch('/api/auth/disconnect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ provider }),
+            });
+
+            if (response.ok) {
+                fetchSettings();
+            } else {
+                alert('Failed to disconnect account');
+            }
+        } catch (error) {
+            console.error('Disconnect error:', error);
+            alert('An error occurred while disconnecting');
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <Loader2 className="animate-spin text-[var(--accent-primary)]" size={48} />
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-3xl">
             <h1 className="text-2xl font-bold mb-1">Settings</h1>
@@ -23,12 +81,26 @@ export default function Settings() {
                                 </div>
                                 <div>
                                     <h3 className="font-medium">Google Drive</h3>
-                                    <p className="text-sm text-[var(--text-secondary)]">Connected as john.doe@gmail.com</p>
+                                    <p className={`text-sm ${connections.googleConnected ? 'text-green-400' : 'text-[var(--text-secondary)]'}`}>
+                                        {connections.googleConnected ? 'Connected' : 'Not connected'}
+                                    </p>
                                 </div>
                             </div>
-                            <button className="px-4 py-2 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-medium">
-                                Disconnect
-                            </button>
+                            {connections.googleConnected ? (
+                                <button
+                                    onClick={() => handleDisconnect('google')}
+                                    className="px-4 py-2 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-medium"
+                                >
+                                    Disconnect
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => handleConnect('google')}
+                                    className="btn-primary text-sm"
+                                >
+                                    Connect Account
+                                </button>
+                            )}
                         </div>
 
                         {/* Instagram */}
@@ -41,15 +113,27 @@ export default function Settings() {
                                 </div>
                                 <div>
                                     <h3 className="font-medium">Instagram Business</h3>
-                                    <p className="text-sm text-yellow-500 flex items-center gap-1">
-                                        <AlertCircle size={12} />
-                                        Not connected
+                                    <p className={`text-sm flex items-center gap-1 ${connections.instagramConnected ? 'text-green-400' : 'text-yellow-500'}`}>
+                                        {!connections.instagramConnected && <AlertCircle size={12} />}
+                                        {connections.instagramConnected ? 'Connected' : 'Not connected'}
                                     </p>
                                 </div>
                             </div>
-                            <button className="btn-primary text-sm">
-                                Connect Account
-                            </button>
+                            {connections.instagramConnected ? (
+                                <button
+                                    onClick={() => handleDisconnect('instagram')}
+                                    className="px-4 py-2 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-medium"
+                                >
+                                    Disconnect
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => handleConnect('instagram')}
+                                    className="btn-primary text-sm"
+                                >
+                                    Connect Account
+                                </button>
+                            )}
                         </div>
                     </div>
                 </section>

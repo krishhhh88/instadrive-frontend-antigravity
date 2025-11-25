@@ -1,20 +1,46 @@
-import { Clock, ChevronDown, Plus, Trash2, Play } from 'lucide-react';
+import { Clock, ChevronDown, Plus, Trash2, Play, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function Scheduler() {
-    const selectedDay = 'Monday';
+    const [selectedDay, setSelectedDay] = useState('Monday');
+    const [timezone, setTimezone] = useState('America/New_York (EST)');
+    const [videos, setVideos] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [isTimezoneOpen, setIsTimezoneOpen] = useState(false);
 
-    const mockVideos = [
-        { id: 1, title: 'Summer Vacation Highlights', duration: '0m 58s', thumb: 'bg-gradient-to-br from-orange-400 to-pink-500' },
-        { id: 2, title: 'Mountain Biking Adventure', duration: '0m 45s', thumb: 'bg-gradient-to-br from-green-400 to-emerald-600' },
-        { id: 3, title: 'Cooking a new Recipe', duration: '0m 33s', thumb: 'bg-gradient-to-br from-yellow-400 to-orange-500' },
-        { id: 4, title: "My Cat's Funniest Moments", duration: '0m 25s', thumb: 'bg-gradient-to-br from-purple-400 to-indigo-500' },
-        { id: 5, title: 'City Timelapse.mov', duration: '1m 0s', thumb: 'bg-gradient-to-br from-blue-400 to-cyan-500' },
-        { id: 6, title: 'Workout Routine.mp4', duration: '0m 52s', thumb: 'bg-gradient-to-br from-red-400 to-rose-600' },
-    ];
-
-    const scheduleSlots = [
+    // Mock schedule slots for now - in a real app these would come from DB
+    const [scheduleSlots, setScheduleSlots] = useState([
         { id: 1, time: '09:00', day: 'Monday' },
         { id: 2, time: '17:00', day: 'Monday' },
+    ]);
+
+    useEffect(() => {
+        fetchVideos();
+    }, []);
+
+    const fetchVideos = async () => {
+        try {
+            // Fetch posts that are ready to schedule (PENDING status)
+            // We might need a specific endpoint for this or filter on client
+            const response = await fetch('/api/dashboard'); // Using dashboard for now as it returns recent posts
+            if (response.ok) {
+                const data = await response.json();
+                // Filter for pending posts or just show all for now as "Content Source"
+                setVideos(data.recentActivity || []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch videos:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const timezones = [
+        'America/New_York (EST)',
+        'America/Los_Angeles (PST)',
+        'Europe/London (GMT)',
+        'Asia/Tokyo (JST)',
+        'Australia/Sydney (AEDT)'
     ];
 
     return (
@@ -32,24 +58,36 @@ export default function Scheduler() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto pr-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {mockVideos.map((video) => (
-                            <div key={video.id} className="group bg-neutral-800 rounded-xl overflow-hidden border border-neutral-700 hover:border-indigo-500 transition-all cursor-pointer">
-                                <div className={`aspect-video ${video.thumb} relative`}>
-                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                        <Play className="text-white fill-white" size={32} />
+                    {loading ? (
+                        <div className="flex items-center justify-center h-64">
+                            <Loader2 className="animate-spin text-indigo-500" size={32} />
+                        </div>
+                    ) : videos.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {videos.map((video) => (
+                                <div key={video.id} className="group bg-neutral-800 rounded-xl overflow-hidden border border-neutral-700 hover:border-indigo-500 transition-all cursor-pointer">
+                                    <div className={`aspect-video bg-gradient-to-br from-gray-700 to-gray-600 relative`}>
+                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                            <Play className="text-white fill-white" size={32} />
+                                        </div>
+                                        {/* <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
+                                            {video.duration || '0:00'}
+                                        </span> */}
                                     </div>
-                                    <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
-                                        {video.duration}
-                                    </span>
+                                    <div className="p-3">
+                                        <h3 className="font-medium text-sm truncate" title={video.videoName}>{video.videoName || 'Untitled'}</h3>
+                                        <p className="text-xs text-neutral-500 mt-1">
+                                            {video.status === 'PENDING' ? 'Ready to schedule' : video.status}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="p-3">
-                                    <h3 className="font-medium text-sm truncate" title={video.title}>{video.title}</h3>
-                                    <p className="text-xs text-neutral-500 mt-1">Ready to schedule</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 text-neutral-500">
+                            <p>No videos found in Drive folder.</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -57,17 +95,41 @@ export default function Scheduler() {
             <div className="w-96 glass-panel p-6 flex flex-col h-full">
                 <h2 className="text-xl font-bold mb-6">Scheduling</h2>
 
-                <div className="mb-6">
+                <div className="mb-6 relative">
                     <label className="block text-sm font-medium text-neutral-400 mb-2">Timezone</label>
-                    <button className="w-full flex items-center justify-between px-4 py-2.5 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-neutral-600 text-left text-sm">
-                        <span>America/New_York (EST)</span>
-                        <ChevronDown size={16} className="text-neutral-500" />
+                    <button
+                        onClick={() => setIsTimezoneOpen(!isTimezoneOpen)}
+                        className="w-full flex items-center justify-between px-4 py-2.5 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-neutral-600 text-left text-sm"
+                    >
+                        <span>{timezone}</span>
+                        <ChevronDown size={16} className={`text-neutral-500 transition-transform ${isTimezoneOpen ? 'rotate-180' : ''}`} />
                     </button>
+
+                    {isTimezoneOpen && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl z-10 overflow-hidden">
+                            {timezones.map((tz) => (
+                                <button
+                                    key={tz}
+                                    className="w-full text-left px-4 py-2 text-sm hover:bg-neutral-700 transition-colors"
+                                    onClick={() => {
+                                        setTimezone(tz);
+                                        setIsTimezoneOpen(false);
+                                    }}
+                                >
+                                    {tz}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                     {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
-                        <div key={day} className={`rounded-xl border ${day === selectedDay ? 'bg-neutral-800/50 border-indigo-500/50' : 'bg-transparent border-transparent'}`}>
+                        <div
+                            key={day}
+                            className={`rounded-xl border transition-colors cursor-pointer ${day === selectedDay ? 'bg-neutral-800/50 border-indigo-500/50' : 'bg-transparent border-transparent hover:bg-neutral-800/30'}`}
+                            onClick={() => setSelectedDay(day)}
+                        >
                             <div className="flex items-center justify-between p-3">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-10 h-6 rounded-full relative transition-colors ${day === selectedDay ? 'bg-indigo-600' : 'bg-neutral-700'}`}>
@@ -78,13 +140,16 @@ export default function Scheduler() {
                             </div>
 
                             {day === selectedDay && (
-                                <div className="p-3 pt-0 space-y-3">
-                                    {scheduleSlots.map((slot) => (
+                                <div className="p-3 pt-0 space-y-3 cursor-default" onClick={(e) => e.stopPropagation()}>
+                                    {scheduleSlots.filter(s => s.day === day).map((slot) => (
                                         <div key={slot.id} className="flex items-center gap-2">
                                             <div className="flex-1 bg-neutral-900 rounded-lg px-3 py-2 text-sm border border-neutral-700 flex items-center justify-between">
                                                 <span>{slot.time}</span>
                                             </div>
-                                            <button className="p-2 text-neutral-500 hover:text-red-400 transition-colors">
+                                            <button
+                                                className="p-2 text-neutral-500 hover:text-red-400 transition-colors"
+                                                onClick={() => setScheduleSlots(slots => slots.filter(s => s.id !== slot.id))}
+                                            >
                                                 <Trash2 size={16} />
                                             </button>
                                         </div>
