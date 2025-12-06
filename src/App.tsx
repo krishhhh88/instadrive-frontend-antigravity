@@ -7,6 +7,7 @@ import Settings from './pages/Settings';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function App() {
     return (
@@ -16,6 +17,7 @@ function App() {
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
                 {/* Protected Dashboard Routes */}
                 <Route path="/dashboard" element={<DashboardLayout />}>
@@ -30,3 +32,4 @@ function App() {
 }
 
 export default App;
+

@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     HardDrive,
@@ -7,14 +7,40 @@ import {
     LogOut,
     Menu
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getMe, logout } from '../lib/api';
 
 export default function DashboardLayout() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const location = useLocation();
+    const [user, setUser] = useState<any>(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        fetchUser();
+    }, []);
+
+    const fetchUser = async () => {
+        try {
+            const response = await getMe();
+            setUser(response.data.user);
+        } catch (error) {
+            console.error('Failed to fetch user:', error);
+            navigate('/login');
+        }
+    };
+
+    const handleLogout = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        try {
+            await logout();
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    };
 
     const navItems = [
-        { icon: LayoutDashboard, label: 'Overview', path: '/dashboard' },
+        { icon: LayoutDashboard, label: 'Overview', path: '/dashboard', end: true },
         { icon: HardDrive, label: 'Drive Files', path: '/dashboard/drive' },
         { icon: Calendar, label: 'Schedule', path: '/dashboard/schedule' },
         { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
@@ -54,20 +80,15 @@ export default function DashboardLayout() {
                     <nav className="flex-1 p-4 space-y-2">
                         {navItems.map((item) => {
                             const Icon = item.icon;
-                            // Check if the current path starts with the item path (for nested routes)
-                            // But for exact match on dashboard root, we need to be careful
-                            const isActive = item.path === '/dashboard'
-                                ? location.pathname === '/dashboard'
-                                : location.pathname.startsWith(item.path);
-
                             return (
                                 <NavLink
                                     key={item.path}
                                     to={item.path}
+                                    end={item.end}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className={({ isActive: routeActive }) => `
+                                    className={({ isActive }) => `
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                    ${isActive || routeActive
+                    ${isActive
                                             ? 'bg-[var(--accent-primary)] text-white shadow-lg shadow-indigo-500/20'
                                             : 'text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] hover:text-white'
                                         }
@@ -82,16 +103,16 @@ export default function DashboardLayout() {
 
                     {/* User Profile */}
                     <div className="p-4 border-t border-[var(--border-color)]">
-                        <Link to="/login" className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-[var(--bg-primary)] transition-colors text-left">
+                        <button onClick={handleLogout} className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-[var(--bg-primary)] transition-colors text-left">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                                JD
+                                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">John Doe</p>
-                                <p className="text-xs text-[var(--text-secondary)] truncate">Pro Plan</p>
+                                <p className="text-sm font-medium text-white truncate">{user?.name || 'Loading...'}</p>
+                                <p className="text-xs text-[var(--text-secondary)] truncate">{user?.email || ''}</p>
                             </div>
                             <LogOut size={18} className="text-[var(--text-secondary)]" />
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </aside>

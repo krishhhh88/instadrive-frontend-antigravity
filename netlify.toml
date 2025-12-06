@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA routing - redirect all routes to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment variables for production
+# Set these in Netlify Dashboard: Site settings > Environment variables
+[build.environment]
+  VITE_API_URL = "https://instadrive-backend-antigravity.vercel.app/api"
